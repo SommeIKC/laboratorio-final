@@ -10,17 +10,17 @@ jobs:
   sast:
     name: SAST
     runs-on: ubuntu-latest
-  steps:
+    steps:
 
-    - name: Checkout code 
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: 18
-    - name: build dependencias
-      run: 
-        npm install
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 18
+      - name: build dependencias
+        run: |
+          npm install
 #DAST
 #      
