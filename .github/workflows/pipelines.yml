@@ -22,5 +22,11 @@ jobs:
       - name: build dependencias
         run: |
           npm install
+      - name: SonarCloud scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          organization: ${{ secrets.SONAR_ORGANIZATION }}
+          projectKey: ${{ secrets.SONAR_PROJECT_KEY }}
+          token: ${{ secrets.SONAR_TOKEN }}
 #DAST
 #      
