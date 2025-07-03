@@ -6,9 +6,15 @@ on:
       - devsecops-pipelines
 
 jobs:
-  test:
+#SAST
+  sast:
+    name: SAST
     runs-on: ubuntu-latest
-    steps:
-      - name: First 
-        run: echo "Test Pipeline"
-      
+  steps:
+    - uses: actions/checkout@v3
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+          node-version: 18
+#DAST
+#      
