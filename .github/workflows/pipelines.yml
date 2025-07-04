@@ -212,7 +212,7 @@ jobs:
               --network zap-net \
               --name reddit-clone-yt \
               -p 3000:3000 \
-              jeanpro/usach-devsecops-v2:latest
+              s0mm3/laboratorio-final:latest
 
         - name: Esperar que la aplicación esté lista
           run: |
