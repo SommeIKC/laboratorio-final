@@ -26,10 +26,4 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: >
-            -Dsonar.organization=somme
-            -Dsonar.projectKey=SommeIKC_laboratorio-final
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-            -Dsonar.qualitygate.wait=true
-            
+        
