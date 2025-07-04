@@ -29,15 +29,34 @@ jobs:
         
       - name: Validar resultado de SonarCloud (SAST)
         run: |
-          
-          idanalisis=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
-            "https://sonarcloud.io/api/project_analyses/search?project=SommeIKC_laboratorio-final" | jq .analyses[0])
-          
-          idanalisisParse=$(echo "$idanalisis" | jq -r .analysisId)
-          echo "ID del análisis: $idanalisisParse"
+          project_key="SommeIKC_laboratorio-final"
+          intentos=0
+          max_intentos=10
+          delay=10
+
+          echo "Esperando que el análisis esté disponible en SonarCloud..."
+
+          while [ $intentos -lt $max_intentos ]; do
+            idanalisis=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
+              "https://sonarcloud.io/api/project_analyses/search?project=$project_key" | jq -r .analyses[0].analysisId)
+
+            if [ "$idanalisis" != "null" ] && [ -n "$idanalisis" ]; then
+              echo "ID del análisis encontrado: $idanalisis"
+              break
+            fi
+
+            echo "Intento $((intentos+1)): análisis aún no disponible. Esperando $delay segundos..."
+            sleep $delay
+            intentos=$((intentos+1))
+          done
+
+          if [ "$idanalisis" == "null" ] || [ -z "$idanalisis" ]; then
+            echo "No se pudo obtener el ID del análisis después de varios intentos."
+            exit 1
+          fi
 
           qualitygate=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
-          "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$idanalisisParse")
+            "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$idanalisis")
 
           qualitygateStatus=$(echo "$qualitygate" | jq -r .projectStatus.status)
           echo "Resultado de Quality Gate: $qualitygateStatus"
