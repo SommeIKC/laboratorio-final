@@ -160,7 +160,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build --tag SommeIKC/laboratorio-final:latest .
+          docker build --tag s0mm3/laboratorio-final:latest .
 
       - name: Docker Login
         uses: docker/login-action@v3.0.0
@@ -170,7 +170,7 @@ jobs:
 
       - name: Push Docker Image
         run: |
-         docker push SommeIKC/laboratorio-final:latest
+         docker push s0mm3/laboratorio-final:latest
 
 #DAST
 
