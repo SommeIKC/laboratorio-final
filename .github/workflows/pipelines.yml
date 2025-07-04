@@ -31,7 +31,7 @@ jobs:
         run: |
           
           idanalisis=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
-            "https://sonarcloud.io/api/project_analyses/search?project=${{ github.repository }}" | jq .analyses[0])
+            "https://sonarcloud.io/api/project_analyses/search?project=SommeIKC_laboratorio-final" | jq .analyses[0])
           
           idanalisisParse=$(echo "$idanalisis" | jq -r .analysisId)
           echo "ID del análisis: $idanalisisParse"
