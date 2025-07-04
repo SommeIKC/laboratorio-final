@@ -1,34 +1,51 @@
 name: DevSecOps Pipelines
 on:
   push:
-    branches:
-      - devsecops-pipelines
+    branches: [ main, devsecops-pipelines ]
+  pull_request:
+    branches: [ main, devsecops-pipelines ]
 
 jobs:
+#ENTORNO
+  BUILD:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - name: build dependencies
+        run: npm install
+      - name: compilacion
+        run: |
+          npm run build
+      - name: Upload build output
+        uses: actions/upload-artifact@master
+        with:
+          name: build-artifact
+          path: ${{ github.workspace }}/.next
+          include-hidden-files: true
+
+
 #SAST
+
   SAST:
     name: SAST
     runs-on: ubuntu-latest
     steps:
-
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - name: build dependencies
-        run: npm install
-
+   
       - name: SonarCloud scan
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >
-            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.wait=false
             -Dsonar.branch.name=main
       - name: Validar resultado de SonarCloud (SAST)
         run: |
@@ -113,6 +130,6 @@ jobs:
         name: reporte-sca
         path: ${{github.workspace}}/dependency-check-report
 
-
+#DAST
 
 
