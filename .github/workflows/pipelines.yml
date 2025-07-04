@@ -6,7 +6,7 @@ on:
 
 jobs:
 #SAST
-  sast:
+  SAST:
     name: SAST
     runs-on: ubuntu-latest
     steps:
@@ -26,4 +26,72 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        
+        with:
+          -Dsonar.qualitygate.wait=true
+      - name: Validar resultado de SonarCloud (SAST)
+        run: |
+          
+          idanalisis=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
+            "https://sonarcloud.io/api/project_analyses/search?project=${{ github.repository }}" | jq .analyses[0])
+          
+          idanalisisParse=$(echo "$idanalisis" | jq -r .analysisId)
+          echo "ID del análisis: $idanalisisParse"
+
+          qualitygate=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: \
+          "https://sonarcloud.io/api/qualitygates/project_status?analysisId=$idanalisisParse")
+
+          qualitygateStatus=$(echo "$qualitygate" | jq -r .projectStatus.status)
+          echo "Resultado de Quality Gate: $qualitygateStatus"
+
+          case "$qualitygateStatus" in
+            "OK")
+              echo "Calidad del código: OK"
+              ;;
+            "ERROR" | "WARN")
+              echo "Calidad del código: $qualitygateStatus"
+              exit 1
+              ;;
+            *)
+              echo "Estado desconocido del Quality Gate: $qualitygateStatus"
+              exit 1
+              ;;
+          esac
+  SCA:
+    needs: SAST
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Install Dependency-Check
+      run: |
+          curl -L -o dc.zip https://github.com/jeremylong/DependencyCheck/releases/download/v8.4.0/dependency-check-8.4.0-release.zip
+          unzip dc.zip -d dc
+          chmod +x dc/dependency-check/bin/dependency-check.sh
+
+    - name: Run OWASP Dependency-Check
+      run: |
+          ./dc/dependency-check/bin/dependency-check.sh \
+            --project "laboratorio-final" \
+            --scan . \
+            --format "JSON" \
+            --out dependency-check-report
+
+    - name: Validar resultado del SCA
+      run: |
+          crits=$(jq '[.dependencies[].vulnerabilities[]? | select(.severity == "Critical" or .severity == "High" or .severity == "Medium")] | length' dependency-check-report/dependency-check-report.json)
+          echo "Vulnerabilidades críticas/altas/medias encontradas: $crits"
+          if [ "$crits" -gt 0 ]; then
+            echo "Fallo en análisis SCA por vulnerabilidades"
+            exit 1
+          fi
+
+    - name: Guardar reporte de SCA como artefacto
+      uses: actions/upload-artifact@v3
+      with:
+        name: reporte-sca
+        path: ${{github.workspace}}/dependency-check-report
+
+
+
+
