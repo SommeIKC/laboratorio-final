@@ -29,7 +29,7 @@ jobs:
         with:
           args: >
             -Dsonar.organization=somme
-            -Dsonar.projectKey=${{ github.event.repository.name }}
+            -Dsonar.projectKey=SommeIKC_laboratorio-final
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
             -Dsonar.qualitygate.wait=true
             
