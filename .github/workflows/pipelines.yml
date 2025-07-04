@@ -197,9 +197,9 @@ jobs:
 #DAST
 
   DAST:
-      needs: DockerBuild
-      runs-on: self-hosted
-      steps:
+    needs: DockerBuild
+    runs-on: self-hosted
+    steps:
         - name: Crear red Docker
           run: |
             docker network rm zap-net || true
